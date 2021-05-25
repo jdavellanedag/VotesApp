@@ -13,6 +13,7 @@ const connectSocketServer = () => {
 function App() {
   const [socket] = useState(() => connectSocketServer());
   const [online, setOnline] = useState(false);
+  const [items, setItems] = useState([]);
 
   useEffect(() => {
     setOnline(socket.connected);
@@ -30,6 +31,28 @@ function App() {
     });
   }, [socket]);
 
+  useEffect(() => {
+    socket.on("current-items", (data) => {
+      setItems(data);
+    });
+  }, [socket]);
+
+  const vote = (id) => {
+    socket.emit("vote-item", id);
+  };
+
+  const removeItem = (id) => {
+    socket.emit("remove-item", id);
+  };
+
+  const changeName = (id, name) => {
+    socket.emit("change-item-name", { id, name });
+  };
+
+  const createItem = (name) => {
+    socket.emit("create-item", { name });
+  };
+
   return (
     <div className="container">
       <div className="alert">
@@ -46,10 +69,10 @@ function App() {
       <hr />
       <div className="row">
         <div className="col-8">
-          <ItemList />
+          <ItemList data={items} vote={vote} remove={removeItem} change={changeName} />
         </div>
         <div className="col-4">
-          <ItemAdd />
+          <ItemAdd add={createItem} />
         </div>
       </div>
     </div>
