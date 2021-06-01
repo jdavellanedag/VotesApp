@@ -1,12 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrashAlt } from "@fortawesome/free-solid-svg-icons";
+import { SocketContext } from "../context/SocketContext";
 
-export const ItemList = ({ data, vote, remove, change }) => {
-  const [items, setItems] = useState(data);
+export const ItemList = () => {
+  const { socket } = useContext(SocketContext);
+  const [items, setItems] = useState([]);
   useEffect(() => {
-    setItems(data);
-  }, [data]);
+    socket.on("current-items", (items) => {
+      setItems(items);
+    });
+    return () => socket.off("current-items");
+  }, [socket]);
 
   const handleChangeName = (event, id) => {
     const newName = event.target.value;
@@ -21,7 +26,15 @@ export const ItemList = ({ data, vote, remove, change }) => {
   };
 
   const onStopFocus = (id, name) => {
-    change(id, name);
+    socket.emit("change-item-name", { id, name });
+  };
+
+  const vote = (id) => {
+    socket.emit("vote-item", id);
+  };
+
+  const remove = (id) => {
+    socket.emit("remove-item", id);
   };
 
   const createRows = () => {

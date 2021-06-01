@@ -1,12 +1,14 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
+import { SocketContext } from "../context/SocketContext";
 
-export const ItemAdd = ({ add }) => {
+export const ItemAdd = () => {
   const [value, setValue] = useState("");
+  const { socket } = useContext(SocketContext);
 
   const onSubmit = (e) => {
     e.preventDefault();
     if (value.trim().length > 0) {
-      add(value);
+      socket.emit("create-item", { name: value });
       setValue("");
     }
   };
